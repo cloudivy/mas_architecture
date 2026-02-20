@@ -1,5 +1,3 @@
 streamlit
 langchain-openai
 langchain-community
-sqlite3
-
