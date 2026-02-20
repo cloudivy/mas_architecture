@@ -248,3 +248,91 @@ with st.sidebar:
     🟢 **Storage** - In-memory persistence ✓
     🟢 **Observability** - Real-time metrics ✓
     """)
+
+# ========================================
+# NEW: ARCHITECTURE EXPLAINER - ADD THIS
+# ========================================
+class ArchitectureExplainer:
+    def __init__(self, llm):
+        self.llm = llm
+    
+    def explain(self, question):
+        explanations = {
+            "what": """🏗️ **Microsoft Multi-Agent Reference Architecture** is an enterprise-grade framework for building scalable AI agent systems. 
+            
+**Core Flow:** User → Orchestrator → Classifier → Supervisor → Agents → MCP Tools → Storage
+- **Orchestrator** routes requests intelligently
+- **Agents** specialize (Researcher/Analyst/Writer)
+- **MCP** provides standardized tool access
+- **Full observability** for production use""",
+            
+            "how": """**Architecture Flow (from your diagram):**
+1. **User App** → Chat interface
+2. **Orchestrator** → Intent Classifier  
+3. **Agent Registry** → Finds right agents
+4. **Supervisor** → Coordinates execution
+5. **Agents** → Use Knowledge Layer + MCP tools
+6. **Storage** → Persists conversations
+7. **Observability** → Real-time monitoring
+
+**Live in your app: Every chat runs this full flow!**""",
+            
+            "why": """**Why Microsoft Architecture?**
+✅ **Scalable** - Add 100s of agents easily
+✅ **Enterprise** - Observability + governance  
+✅ **Standardized** - MCP protocol for tools
+✅ **Modular** - Independent layers
+✅ **Production** - Storage + monitoring built-in
+
+**Perfect for IOCL PdM + PhD research!**""",
+            
+            "mcp": """**MCP (Model Context Protocol)** = Standardized tool interface
+- Agents call tools via MCP (web_search, db_query)
+- Interoperable across agent frameworks  
+- Microsoft Semantic Kernel standard
+- Live in your app: Every agent uses MCP tools"""
+        }
+        
+        q_lower = question.lower()
+        for key in explanations:
+            if key in q_lower:
+                return explanations[key]
+        return "Ask: 'what is this?', 'how does it work?', 'why use it?', or 'what is mcp?'"
+
+# Initialize explainer (add after architecture init)
+st.session_state.explainer = ArchitectureExplainer(llm)
+
+# ========================================
+# NEW TAB SYSTEM - ADD THIS
+# ========================================
+tab1, tab2 = st.tabs(["🤖 Run Architecture", "💬 Architecture Guide"])
+
+with tab1:
+    # YOUR EXISTING CODE GOES HERE (unchanged)
+    col1, col2 = st.columns([3, 1])
+    # ... your existing chat + observability code ...
+
+with tab2:
+    st.markdown("### 💬 **Architecture Guide - Ask Me Anything!**")
+    
+    if "guide_messages" not in st.session_state:
+        st.session_state.guide_messages = []
+    
+    # Show guide chat
+    for msg in st.session_state.guide_messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+    
+    # Guide input
+    guide_prompt = st.chat_input("🤔 Ask about the architecture... (what/how/why/mcp)")
+    
+    if guide_prompt:
+        st.session_state.guide_messages.append({"role": "user", "content": guide_prompt})
+        with st.chat_message("user"):
+            st.markdown(guide_prompt)
+        
+        with st.chat_message("assistant"):
+            explanation = st.session_state.explainer.explain(guide_prompt)
+            st.markdown(explanation)
+            st.session_state.guide_messages.append({"role": "assistant", "content": explanation})
+
